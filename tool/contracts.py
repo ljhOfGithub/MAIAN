@@ -25,11 +25,11 @@ def compile_contract(filename):
     with open(filename, 'r') as myfile:
         code=myfile.read()
     
-    p=Popen(['solc','--bin','--abi','-o','out',source_file,'--overwrite'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    p=Popen(['solc','--bin','--abi','-o','out',source_file,'--overwrite'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)#将所有的输出都保存到一个单独的文件夹中，使用abi生成bytes输出,用源文件的名字命名abi文件
     solo = ''
-    while p.poll() is None:
-        l = p.stdout.readline()
-        solo += bytes.decode(l)
+    while p.poll() is None:#检查子进程是否已终止。 设置并返回返回码属性。如果还在运行，返回 None。
+        l = p.stdout.readline()#使用标准输出设备读取子进程的实时输出结果
+        solo += bytes.decode(l)#以指定的编码格式解码 bytes 对象。默认编码为 'utf-8'
     if 'Error' in solo:
         print(solo)
         print('\033[91m[-] Cannot compile the contract \033[0m')
@@ -42,7 +42,7 @@ def compile_contract(filename):
 def get_function_hashes(contract):
 
         
-    data = json.load(open('out/'+contract+'.abi'))
+    data = json.load(open('out/'+contract+'.abi'))#
     fhashes = {}
     for d in data:
         if 'type' in d and d['type'] == 'function':
@@ -144,7 +144,7 @@ def to_binary(x):
     else: 
         return to_binary(int(x / 256)) + chr(x % 256)    
 
-def normalize_address(x, allow_blank=False):
+def normalize_address(x, allow_blank=False):#x传入账户地址，将地址转换为合法地址
     if allow_blank and x == '':
         return ''
     if len(x) in (42, 50) and x[:2] == '0x':
@@ -161,8 +161,8 @@ def normalize_address(x, allow_blank=False):
 
 def predict_contract_address(accountAddress):
 
-    nonce = int(MyGlobals.web3.eth.getTransactionCount(accountAddress)) 
-    adr = Web3.sha3(rlp.encode([normalize_address(accountAddress), nonce]), encoding='bytes')[-40:]
+    nonce = int(MyGlobals.web3.eth.getTransactionCount(accountAddress)) #返回指定地址发起的交易数
+    adr = Web3.sha3(rlp.encode([normalize_address(accountAddress), nonce]), encoding='bytes')[-40:]#
     return '0x'+adr
 
 
