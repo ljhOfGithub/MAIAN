@@ -6,9 +6,11 @@ from z3 import *
 
 def print_stack(stack):
     print('\033[90m------------------------------------- STACK -------------------------------------')
-    for s in stack[::-1]:
-        if 'z3' in s:
+    for s in stack[::-1]:#翻转栈对象，先进后出
+        if 'z3' in s:#对于位向量，可以使用is_bv_value检查变量是否是值，并使用is_bv检查变量是否是变量
             if is_bv_value( simplify(s['z3'])): print('%10s : %4x  : %x' % (s['type'],s['step'],simplify(s['z3']).as_long() ) )
+            #simplify（）是尽可能的让表达式最简化，其最简化的形式是不定的
+            #as_long把z3的Int转换成python的int
             else: print('%10s : %4x  : %s' % (s['type'],s['step'], simplify(s['z3']) ) )
         else:
             print('%10s : %4x  ' % (s['type'],s['step']) )
@@ -39,10 +41,12 @@ def print_trace(trace):
 
 
 # Computes hash of input
-def get_hash(txt):
+def get_hash(txt):#计算哈希值
     k = md5()
     k.update(txt.encode('utf-8'))
-    return int(k.hexdigest(),16)
+    return int(k.hexdigest(),16)#
+    # update需要一个bytes格式参数
+    #value = md5.hexdigest() #拿到十六进制的加密字符串
 
 # Determines the TX inputs so that the contract can be exploited
 def get_function_calls( calldepth, debug ):

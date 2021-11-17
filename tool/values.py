@@ -7,7 +7,7 @@ from z3 import *
 # Get value 
 def get_params(param, input):
 
-    if (param+str(input)) in MyGlobals.st:
+    if (param+str(input)) in MyGlobals.st:#判断区块是否有该参数，如果没有就提示添加，如果有就返回
         return MyGlobals.st[param+str(input)]
     else:
         print('need to set the parameters: %s ' % (param+str(input) ) )
@@ -15,12 +15,12 @@ def get_params(param, input):
 
 # Is set
 def is_params(param,input):
-    return (param+str(input)) in MyGlobals.st 
+    return (param+str(input)) in MyGlobals.st#判断区块是否包括该参数
 
 # Set parameter
 def set_params(param, input, value):
     global st
-    MyGlobals.st[param+str(input)] = value      
+    MyGlobals.st[param+str(input)] = value#设置区块的参数      
 
 
 # Create a dict of paramters
@@ -28,11 +28,11 @@ def initialize_params(read_from_blockchain, c_address):
 
     # Set (dummy) values for some blockchain parameters used in the contracts
     global st
-    MyGlobals.st = {}
-    MyGlobals.st['my_address'] = MyGlobals.adversary_account
-    MyGlobals.st['contract_address'] = c_address
-    if read_from_blockchain:
-        MyGlobals.st['contract_balance'] = str(MyGlobals.web3.eth.getBalance(c_address)+1).zfill(64)
+    MyGlobals.st = {}#MyGlobals的区块对象
+    MyGlobals.st['my_address'] = MyGlobals.adversary_account#
+    MyGlobals.st['contract_address'] = c_address#设置为传入的合约地址
+    if read_from_blockchain:#从区块链上读取实际的账户余额
+        MyGlobals.st['contract_balance'] = str(MyGlobals.web3.eth.getBalance(c_address)+1).zfill(64)#zfill原字符串右对齐，前面填充0
     else:
         MyGlobals.st['contract_balance'] = '7' * 64
     MyGlobals.st['gas'] = ('765432').zfill(64)
@@ -46,7 +46,7 @@ def initialize_params(read_from_blockchain, c_address):
 def print_params():
 
     for s in MyGlobals.st:
-        print('%20s : %s' % (s, str(MyGlobals.st[s])))
+        print('%20s : %s' % (s, str(MyGlobals.st[s])))#打印区块对象的各个参数
 
 
 
@@ -91,8 +91,8 @@ def configuration_exist(step, configurations, nc):
 def seen_configuration( configurations, ops, position, stack, mmemory, storage):
 
         # Check if configuration exist
-        op = ops[position]['o']
-        step = ops[position]['id']
+        op = ops[position]['o']#汇编指令名
+        step = ops[position]['id']#汇编指令序号
         nc = create_configuration( stack, mmemory, storage)
         if configuration_exist(step, configurations, nc): 
             return True
@@ -112,7 +112,7 @@ class MyGlobals(object):
 
     MAX_JUMP_DEPTH          = 60                    # path length in CFG
     MAX_CALL_DEPTH          = 0                     # different function calls to the contract
-    MAX_VISITED_NODES       = 2000                  # sum of all paths in search of one contract
+    MAX_VISITED_NODES       = 2000                  # sum of all paths in search of one contract寻找一份合同的所有路径的总和
     max_calldepth_in_normal_search = 3
 
     ETHER_LOCK_GOOD_IF_CAN_CALL = True
@@ -145,8 +145,8 @@ class MyGlobals(object):
     port_number = '8550'
     confirming_transaction ='0x3094c123bd9ffc3f41dddefd3ea88e4296e45015b62e892f8bdf9d1b645ef2d2'
     etherbase_account = '0x69190bde29255c02363477462f17e816a9533d3a'
-    adversary_account = '5a1cd1d07d9f59898c434ffc90a74ecd937feb12'
-    sendingether_account = '564625b3ae8d0602a8fc0fe22c884b091098417f'
+    adversary_account = '5a1cd1d07d9f59898c434ffc90a74ecd937feb12'#对手账户
+    sendingether_account = '564625b3ae8d0602a8fc0fe22c884b091098417f'#转出钱的账户
     send_initial_wei = 44
     web3 = None
 
@@ -161,8 +161,8 @@ class MyGlobals(object):
 
 def clear_globals():
 
-    MyGlobals.s = Solver()
-    MyGlobals.s.set("timeout", MyGlobals.SOLVER_TIMEOUT)
+    MyGlobals.s = Solver()#z3的Solver约束求解器
+    MyGlobals.s.set("timeout", MyGlobals.SOLVER_TIMEOUT)#设置时间阈值自动销毁z3的Solver约束求解器对象
 
 
     MyGlobals.search_condition_found = False
