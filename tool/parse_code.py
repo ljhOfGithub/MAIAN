@@ -14,7 +14,7 @@ def get_one_op( code, pos, size_of_input, debug=False ):#pos是parse_code解析�
         o = cops[ instruction ]#将十六进制转换为汇编指令
     t = {'id':int(pos/2),'op':code[pos:pos+2],'input':code[pos+2:pos+2+2*size_of_input],'o':o}#构建字典，汇编指令的下标，操作码的值，PUSH要处理的字节码开始下标，汇编指令
     return (pos + 2 + 2*size_of_input, t)#t是汇编指令对象，包含汇编指令的各个参数
-
+    #id：指令序号，op：具体的bytes值，input：该指令要输入的操作数，o：汇编指令名
 def parse_code( code, debug = False):#传入字节码code
     ops = list()
 

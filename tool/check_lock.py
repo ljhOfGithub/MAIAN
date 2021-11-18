@@ -96,7 +96,7 @@ def check_one_contract_on_ether_lock(contract_bytecode, contract_address, debug 
     trace   = []
     configurations = {}
     execute_one_block(ops,stack,0, trace, storage, mmemory, data, configurations,  ['STOP','RETURN'], ether_lock_can_recieve, 0, 0, debug, read_from_blockchain )
-
+    #configurations一直是空列表
     print(('\033[91m[-]' if not MyGlobals.stop_search else '\033[92m[+]')+'\033[0m \033[1mContract can receive Ether\033[0m' )
 
     # If it did not find, then the contract cannot receive Ether and thus it cannot lock ether (is not bad )

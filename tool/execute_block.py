@@ -79,7 +79,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
         #ether_suicide# Once SUICIDE is executed, the contract is killed
         #Thus the search is stoppped and the contract is flagged as suicidal
         #ether_leak# Once SUICIDE is executed, then no need to look for the final STOP or RETURN
-        # because SUICIDE is already a stopping instruction
+        #because SUICIDE is already a stopping instruction
             new_search_condition_found, stop_expanding_the_search_tree =  search_function( ops[pos]['o'] , stack , trace, debug )
             MyGlobals.search_condition_found = MyGlobals.search_condition_found or new_search_condition_found
 
@@ -136,12 +136,12 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
         # 2) calldataload
         # 3) calldatasize
         # 4) unknown instruction
-        if pos == newpos:
+        if pos == newpos:#pc不增加
         
             si = ops[pos]
 
             # It can be JUMPI
-            if si['o'] == 'JUMPI':
+            if si['o'] == 'JUMPI':#分支
             
                 if len(stack) < 2:
                     if debug: print('\033[95m[-] In JUMPI (line %x) the stack is too small to execute JUMPI\033[0m' % pos )
@@ -150,7 +150,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                 addr = stack.pop()
                 des = stack.pop()
 
-                if is_undefined(des):
+                if is_undefined(des):#表达式不能被求值
                     if debug: print('\033[95m[-] In JUMPI the expression cannot be evaluated (is undefined)\033[0m'   )
                     return False
 
@@ -241,7 +241,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                 
                 return 
 
-            # It can be CALLDATALOAD
+            # It can be CALLDATALOAD汇编指令CALLDATALOAD
             elif si['o'] == 'CALLDATALOAD':
 
                 addr = stack.pop()
@@ -320,7 +320,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                 return
 
 
-            # It can be CALLDATASIZE
+            # It can be CALLDATASIZE汇编指令CALLDATASIZE
             elif si['o'] == 'CALLDATASIZE':
 
 
