@@ -24,8 +24,8 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
     # Execute the next block of operations 执行操作的新块
     first = True
     newpos = pos
-    while (first or newpos != pos) and not MyGlobals.stop_search:
-
+    while (first or newpos != pos) and not MyGlobals.stop_search:#直到停止搜索
+#first or newpos != pos：基本块的入口
 
         first = False
         pos = newpos    
@@ -42,11 +42,11 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
 
         # Check if calldepth or jumpdepth should be changed 检查calldepth和jumpdepth是否要修改
         # and stop the search if certain conditions are met 停止条件
-        if pos == 0: 
+        if pos == 0: #第一条指令
             calldepth += 1
             jumpdepth = 0
-        if ops[pos]['o'] == 'JUMPDEST': jumpdepth += 1
-        if( jumpdepth > MyGlobals.MAX_JUMP_DEPTH): 
+        if ops[pos]['o'] == 'JUMPDEST': jumpdepth += 1#该位置是JUMPDEST指令则调用深度+1,jumpdepth是CFG控制流图中的路径长度
+        if( jumpdepth > MyGlobals.MAX_JUMP_DEPTH): #保证调用深度不超过MAX_JUMP_DEPTH
             if debug:print ('\033[95m[-] Reach MAX_JUMP_DEPTH\033[0m' )
             return
         if( calldepth > MyGlobals.MAX_CALL_DEPTH): 
@@ -57,9 +57,9 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
 
 
         # Check if configuration exist if 
-        # - it is the first instruction in the code (the code restarted)
-        # - it is jumpdest
-        # - it is the first instruction after JUMPI 
+        # - it is the first instruction in the code (the code restarted)第一条指令
+        # - it is jumpdest JUMPDEST表明这个Block是一个跳转的起始位置
+        # - it is the first instruction after JUMPI 条件跳转语句后面第一条指令是基本块的入口
         if pos == 0 or ops[pos]['o'] == 'JUMPDEST' or (pos > 0 and ops[pos-1]['o'] == 'JUMPI'):
             if seen_configuration( configurations, ops, pos, stack, mmemory, storage): #如果有配置则可以debug，否则添加默认配置
                 if debug:print ('\033[95m[-] Seen configuration\033[0m' )
@@ -74,6 +74,12 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                 print('\033[96m[+] Reached %s at %x \033[0m'  % (ops[pos]['o'], ops[pos]['id'] ) )
                 print_stack( stack )
         #search_function是类似ether_lock_can_recieve,ether_lock_can_send，ether_suicide，ether_leak函数的函数变量，可以传入参数，相当于调用该函数
+        #ether_lock_can_recieve函数# Once STOP/RETURN  is executed, the search can be stoppped
+        #ether_lock_can_send# Once STOP/RETURN  is executed, the search can be stoppped
+        #ether_suicide# Once SUICIDE is executed, the contract is killed
+        #Thus the search is stoppped and the contract is flagged as suicidal
+        #ether_leak# Once SUICIDE is executed, then no need to look for the final STOP or RETURN
+        # because SUICIDE is already a stopping instruction
             new_search_condition_found, stop_expanding_the_search_tree =  search_function( ops[pos]['o'] , stack , trace, debug )
             MyGlobals.search_condition_found = MyGlobals.search_condition_found or new_search_condition_found
 
@@ -84,7 +90,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
             if MyGlobals.stop_search or stop_expanding_the_search_tree:  return
 
 
-        # Execute the next operation
+        # Execute the next operation该基本块中的下一条指令
         newpos, halt = execute( ops, stack, pos, storage, mmemory, data, trace, calldepth, debug, read_from_blockchain  )
 
 
@@ -98,7 +104,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
 
                 # If search condition still not found then call again the contract
                 # (infinite loop is prevented by calldepth )
-                if not MyGlobals.search_condition_found:
+                if not MyGlobals.search_condition_found:#还未找到搜索条件则再次调用该合约
                     stack   = []
                     mmemory = {}
                     newpos = 0
@@ -110,7 +116,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                             sys.stdout.flush()
                     continue
 
-                # Else stop the search
+                # Else stop the search否则停止搜索
                 else:
 
                     MyGlobals.stop_search = True
@@ -120,7 +126,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                     return
 
 
-            # In all other cases stop further search in this branch of the tree
+            # In all other cases stop further search in this branch of the tree在所有其他情况下，停止在树的这个分支的进一步搜索
             else:
                 return 
     
@@ -152,7 +158,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
 
 
                 #
-                # Branch when decision is incorrect (no need to compute the addresses)      
+                # Branch when decision is incorrect (no need to compute the addresses)  决定不正确时则分支    
                 #
 
                 # In the fast search mode, the jumpi pos + 1 must be in the list of good jump positions
@@ -175,7 +181,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                             sole = ''
 
                             execute_one_block(ops,stack2,   pos + 1,    trace2, storage2,   mmemory2, data2, configurations,    search_op, search_function, jumpdepth+1, calldepth, debug, read_from_blockchain )
-
+                    #每执行一个块则jumpdepth+1，
 
                     except Exception as e:
                         print ("Exception: "+str(e))
@@ -186,7 +192,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                 if MyGlobals.stop_search: return
 
                 #
-                # Branch when the decision is possibly correct
+                # Branch when the decision is possibly correct 
                 #
                 if not is_fixed(addr):
                     if debug: print('\033[95m[-] In JUMPI the jump address cannot be determined \033[0m'  % jump_dest )

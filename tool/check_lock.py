@@ -58,7 +58,7 @@ def run_one_check( max_call_depth, ops, contract_address, debug, read_from_block
     configurations = {}
 
     execute_one_block(ops,stack,0, trace, storage, mmemory, data, configurations,  ['CALL','CALLCODE','DELEGATECALL','SUICIDE'], ether_lock_can_send, 0, 0, debug, read_from_blockchain )
-
+#列表是要搜索的汇编指令，第三个参数0表示从头开始
 
 
 

@@ -83,12 +83,12 @@ def unary( o1, step, op='NONE' ):
     return {'type':'constant','step':step, 'z3': z3} 
 
 
-def binary( o1, o2 , step, op='NONE'):#二元操作码
+def binary( o1, o2 , step, op='NONE'):#二元操作码（汇编指令）
 
 
-    # In some cases the result can be determined with the knowledge of only one operand
+    # In some cases the result can be determined with the knowledge of only one operand某些情况下结果可以由一个操作数决定
     if is_fixed(o1):
-        val = simplify(o1['z3']).as_long()
+        val = simplify(o1['z3']).as_long()#乘法，且，除法，地板除，则0
         if op in ['MUL','AND','DIV','SDIV'] and 0 == val: return {'type':'constant','step':step, 'z3':BitVecVal(0,256) }
         if op in ['XOR','ADD'] and 0 == val: return o2
         
@@ -97,7 +97,7 @@ def binary( o1, o2 , step, op='NONE'):#二元操作码
         if op in ['MUL','AND','DIV','SDIV'] and 0 == val: return {'type':'constant','step':step, 'z3':BitVecVal(0,256) }
         if op in ['XOR','ADD'] and 0 == val: return o1
 
-    # If some of the operands is undefined then the result should be undefined 
+    # If some of the operands is undefined then the result should be undefined 如果某些操作数未定义，则结果也应未定义
     if is_undefined(o1) or is_undefined(o2): return {'type':'undefined','step':step}
 
 
@@ -174,34 +174,34 @@ def is_good_jump(ops,pos, debug):
 
 
 def execute( code, stack, pos, storage, mmemory, data, trace, calldepth, debug, read_from_blockchain  ):
-    op = code[pos]['o']
+    op = code[pos]['o']#特定位置的汇编指令的名称
     halt = False
     executed = True
     step = code[pos]['id']
 
-    if op not in allops:
+    if op not in allops:#字节码中该位置未找到该汇编指令
         print('Unknown operation %s at pos %x' % (op,pos) )
         return pos,True
 
     # check if stack has enough elements
-    if allops[op][1] > len(stack): 
+    if allops[op][1] > len(stack): #allops[op][1]该操作需要的操作数，栈的剩余大小无法存储那么多的操作数
         if debug: print('Not enough entries in the stack to execute the operation %8s  at step %x: required %d, provided %d' % (op,code[pos]['id'], allops[op][1], len(stack)) )
         return pos, True
     start_stack_size = len(stack)
-    final_stack_size = len(stack) - allops[op][1] + allops[op][2]
+    final_stack_size = len(stack) - allops[op][1] + allops[op][2]#存储完需要的操作数后剩余的栈大小
 
     # get arguments from the stack
     # the cases of DUP and SWAP are different, so avoid those
     args = []
-    if op.find('SWAP') < 0 and op.find('DUP') < 0 and op not in ['JUMPI']:
+    if op.find('SWAP') < 0 and op.find('DUP') < 0 and op not in ['JUMPI']:#没有SWAP,DUP并且不是JUMPI则将栈中的参数放入args的列表中
         for i in range( allops[op][1] ): args.append( stack.pop() )
     
 
-    # all unary
+    # all unary 一元操作码
     if op in ['ISZERO','NOT']: 
         stack.append( unary ( args[0] ,step, op ) )
         
-    # all binary except SIGNEXTEND
+    # all binary except SIGNEXTEND除了符号扩充外的二元操作码
     elif op in ['ADD','MUL','SUB','DIV','SDIV','MOD','SMOD','EXP','AND','OR','XOR', 'LT','GT','SLT','SGT','EQ']:
         stack.append( binary (  args[0] , args[1] , step , op ) )
 
