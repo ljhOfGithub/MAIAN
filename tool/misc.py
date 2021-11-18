@@ -6,9 +6,9 @@ from z3 import *
 
 def print_stack(stack):
     print('\033[90m------------------------------------- STACK -------------------------------------')
-    for s in stack[::-1]:#翻转栈对象，先进后出
-        if 'z3' in s:#对于位向量，可以使用is_bv_value检查变量是否是值，并使用is_bv检查变量是否是变量
-            if is_bv_value( simplify(s['z3'])): print('%10s : %4x  : %x' % (s['type'],s['step'],simplify(s['z3']).as_long() ) )
+    for s in stack[::-1]:#翻转栈对象，先进后出，逆序输出
+        if 'z3' in s:#对于位向量，可以使用is_bv_value检查变量是否是值，并使用is_bv检查变量是否是变量,先判断是否是位向量，如果是则要转换为python的int，否则直接用simplify(s['z3']) )取值
+            if is_bv_value( simplify(s['z3'])): print('%10s : %4x  : %x' % (s['type'],s['step'],simplify(s['z3']).as_long() ) )#打印变量的类型，序号，值
             #simplify（）是尽可能的让表达式最简化，其最简化的形式是不定的
             #as_long把z3的Int转换成python的int
             else: print('%10s : %4x  : %s' % (s['type'],s['step'], simplify(s['z3']) ) )
@@ -37,7 +37,7 @@ def print_memory(mmemory):
 def print_trace(trace):
     print('++++++++++++++++++++++++++++ Trace ++++++++++++++++++++++++++++')
     for o in trace:
-        print('%6x  : %2s : %12s : %s' % (o['id'],o['op'],o['o'] , o['input']) )
+        print('%6x  : %2s : %12s : %s' % (o['id'],o['op'],o['o'] , o['input']) )#id是指令序号，op是bytes值，o是指令名，input是指令的操作数
 
 
 # Computes hash of input
@@ -63,13 +63,13 @@ def get_function_calls( calldepth, debug ):
         sol = {}
         for d in m:
             if debug: print('%s -> %x' % (d,m[d].as_long() ) )
-            sol[str(d)] = '%x' % m[d].as_long()
+            sol[str(d)] = '%x' % m[d].as_long()#将模型中的输出到字典sol中
 
 
         function_inputs = {}
     
-        # Get separate calldepth inputs
-        for cd in range (1,calldepth+1):
+        # Get separate calldepth inputs 不同的调用深度的输入
+        for cd in range (1,calldepth+1):#cd是calldepth
 
             
             # Find next free
@@ -78,7 +78,7 @@ def get_function_calls( calldepth, debug ):
                 if ('input'+str(cd)+'['+str(4+32*f)+']') in sol or ('input'+str(cd)+'['+str(4+32*f)+']d') in sol:
                     next_free = 32*f + 32
 
-            # Fix weird addresses
+            # Fix weird addresses修复奇怪的地址
             for f in range(100):
                 addr = 'input'+str(cd)+'['+str(4+32*f)+']d'
                 if addr in sol:
