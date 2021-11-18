@@ -145,14 +145,14 @@ def to_binary(x):
         return to_binary(int(x / 256)) + chr(x % 256)    
 
 def normalize_address(x, allow_blank=False):#x传入账户地址，将地址转换为合法地址
-    if allow_blank and x == '':
+    if allow_blank and x == '':#允许空地址
         return ''
-    if len(x) in (42, 50) and x[:2] == '0x':
+    if len(x) in (42, 50) and x[:2] == '0x':#如果前两个字符是0x，截取从第三个字符开始的所有字符串
         x = x[2:]
     if len(x) in (40, 48):
         x = decode_hex(x)
     if len(x) == 24:
-        assert len(x) == 24 and sha3(x[:20])[:4] == x[-4:]
+        assert len(x) == 24 and sha3(x[:20])[:4] == x[-4:]#比较哈希值
         x = x[:20]
     if len(x) != 20:
         raise Exception("Invalid address format: %r" % x)

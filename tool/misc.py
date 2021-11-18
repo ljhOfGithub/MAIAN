@@ -54,10 +54,10 @@ def get_function_calls( calldepth, debug ):
     global s, no_function_calls, function_calls
 
 
-    if MyGlobals.s.check() == sat:
+    if MyGlobals.s.check() == sat:#Z3 solver；sat表示satisfiable可解
 
 
-        m = MyGlobals.s.model()
+        m = MyGlobals.s.model()#上一个check用的模型，如问题x+2=0.则模型是x=-2
 
         if debug: print('\nSolution:')
         sol = {}

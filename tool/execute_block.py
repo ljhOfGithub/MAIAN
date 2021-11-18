@@ -32,7 +32,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
             
         # If no more code, then stop
         if pos >= len(ops) or pos < 0:
-            if debug: print('\033[94m[+] Reached bad/end of execution\033[0m')#执行结束
+            if debug: print('\033[94m[+] Reached bad/end of execution\033[0m')#字节码分析执行结束
             return False
 
 
@@ -40,8 +40,8 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
         if debug: print('[ %3d %3d %5d] : %4x : %12s : %s  ' % (calldepth, jumpdepth, MyGlobals.visited_nodes, ops[pos]['id'], ops[pos]['o'], ops[pos]['input']) )
 
 
-        # Check if calldepth or jumpdepth should be changed 
-        # and stop the search if certain conditions are met
+        # Check if calldepth or jumpdepth should be changed 检查calldepth和jumpdepth是否要修改
+        # and stop the search if certain conditions are met 停止条件
         if pos == 0: 
             calldepth += 1
             jumpdepth = 0
