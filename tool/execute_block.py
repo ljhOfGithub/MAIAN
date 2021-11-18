@@ -147,8 +147,8 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                     if debug: print('\033[95m[-] In JUMPI (line %x) the stack is too small to execute JUMPI\033[0m' % pos )
                     return False
         
-                addr = stack.pop()#第一个弹出的参数是条件
-                des = stack.pop()#目的地址，要跳转的地址
+                addr = stack.pop()#第一个弹出的参数是地址
+                des = stack.pop()#判断条件
 
                 if is_undefined(des):#表达式不能被求值
                     if debug: print('\033[95m[-] In JUMPI the expression cannot be evaluated (is undefined)\033[0m'   )
@@ -162,7 +162,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                 #
 
                 # In the fast search mode, the jumpi pos + 1 must be in the list of good jump positions
-                if is_good_jump( ops, pos+1, debug ): 
+                if is_good_jump( ops, pos+1, debug ):#如果不是调试模式 
 
                     MyGlobals.s.push()#把下面的断言压入栈
                     MyGlobals.s.add( des['z3'] == 0)#添加限制到z3 solver
@@ -194,23 +194,23 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                 #
                 # Branch when the decision is possibly correct 
                 #
-                if not is_fixed(addr):
+                if not is_fixed(addr):#如果跳转地址不是定值是变量则不跳转
                     if debug: print('\033[95m[-] In JUMPI the jump address cannot be determined \033[0m'  % jump_dest )
                     return False
     
-                jump_dest = get_value( addr )
-                if( jump_dest <= 0):
+                jump_dest = get_value( addr )#如果跳转地址是定值，取得跳转地址
+                if( jump_dest <= 0):#如果跳转地址无效则不跳转
                     if debug: print('\033[95m[-] The jump destination is not a valid address : %x\033[0m'  % jump_dest )
                     return False
 
-                new_position= find_pos(ops, jump_dest )
-                if( new_position < 0):
+                new_position= find_pos(ops, jump_dest )#找JUMPDEST指令的地址
+                if( new_position < 0):#如果找不到就不跳转
                     if debug: print('\033[95m[-] The code has no such jump destination: %s at line %x\033[0m' % (hex(jump_dest), si['id']) )
                     return False
 
 
                 # In the fast search mode, the jumpi new_position must be in the list of good jump positions
-                if is_good_jump( ops, new_position, debug ): 
+                if is_good_jump( ops, new_position, debug ): #如果不是debug模式
 
                     MyGlobals.s.push()
                     MyGlobals.s.add( des['z3'] != 0)
@@ -244,7 +244,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
             # It can be CALLDATALOAD汇编指令CALLDATALOAD
             elif si['o'] == 'CALLDATALOAD':
 
-                addr = stack.pop()
+                addr = stack.pop()#地址
 
                 # First find the symbolic variable name
                 text = str(addr['z3'])
