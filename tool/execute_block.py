@@ -251,9 +251,9 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                 regex = re.compile('input[0-9]*\[[0-9 ]*\]')
                 match = re.search( regex, text)#用正则表达式寻找起止坐标
                 if match:
-                    sm = text[match.start():match.end()]
+                    sm = text[match.start():match.end()]#获得
 
-                    # assign random (offset) address as value for the variable
+                    # assign random (offset) address as value for the variable 
                     random_address = get_hash(sm) >> 64
                     
                     r2 = re.compile('\[[0-9 ]*\]')
