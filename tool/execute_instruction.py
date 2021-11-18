@@ -164,7 +164,7 @@ def ternary( o1, o2 , o3, step, op='NONE'):#三元操作码
         print(o3)
         return {'type':'undefined','step':step} 
 
-def is_good_jump(ops,pos, debug):
+def is_good_jump(ops,pos, debug):#运行时默认为真，调试时为假
 
     return True
 

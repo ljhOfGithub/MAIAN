@@ -123,7 +123,7 @@ class MyGlobals(object):#全局变量管理类
     # Z3 solver
     # 
     s = None
-    SOLVER_TIMEOUT = 10000          #timeout
+    SOLVER_TIMEOUT = 10000          #timeout z3 solver的限定时长
 
     search_condition_found = False
     stop_search = False

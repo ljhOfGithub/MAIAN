@@ -17,7 +17,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
 
     if MyGlobals.stop_search : return 
 
-    MyGlobals.visited_nodes += 1
+    MyGlobals.visited_nodes += 1#搜索一个契约的所有路径总数
     if MyGlobals.visited_nodes > MyGlobals.MAX_VISITED_NODES: return
     
     
@@ -25,10 +25,10 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
     first = True
     newpos = pos
     while (first or newpos != pos) and not MyGlobals.stop_search:#直到停止搜索
-#first or newpos != pos：基本块的入口
+    #first or newpos != pos：基本块的入口
 
         first = False
-        pos = newpos    
+        pos = newpos#pc所指的指令位置    
             
         # If no more code, then stop
         if pos >= len(ops) or pos < 0:
@@ -81,7 +81,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
         #ether_leak# Once SUICIDE is executed, then no need to look for the final STOP or RETURN
         #because SUICIDE is already a stopping instruction
             new_search_condition_found, stop_expanding_the_search_tree =  search_function( ops[pos]['o'] , stack , trace, debug )
-            MyGlobals.search_condition_found = MyGlobals.search_condition_found or new_search_condition_found
+            MyGlobals.search_condition_found = MyGlobals.search_condition_found or new_search_condition_found#是否找到search_condition
 
             if stop_expanding_the_search_tree:#如果停止生成搜索树则返回函数调用追踪的参数
                 get_function_calls( calldepth, debug )
@@ -90,7 +90,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
             if MyGlobals.stop_search or stop_expanding_the_search_tree:  return
 
 
-        # Execute the next operation该基本块中的下一条指令
+        # Execute the next operation该基本块中的下一条指令，更新pc的值
         newpos, halt = execute( ops, stack, pos, storage, mmemory, data, trace, calldepth, debug, read_from_blockchain  )
 
 
@@ -99,7 +99,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
         
             if debug: print('\033[94m[+] Halted on %s on line %x \033[0m' % (ops[pos]['o'],ops[pos]['id']))
             
-            # If normal stop 
+            # If normal stop 正常的程序结束
             if ops[pos]['o'] in ['STOP','RETURN','SUICIDE']:
 
                 # If search condition still not found then call again the contract
@@ -113,10 +113,10 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                     if not debug:
                         print('%d' % calldepth,end='')
                         if MyGlobals.exec_as_script:
-                            sys.stdout.flush()
+                            sys.stdout.flush()#清空标准输出设备
                     continue
 
-                # Else stop the search否则停止搜索
+                # Else stop the search否则（如果找到了）停止搜索
                 else:
 
                     MyGlobals.stop_search = True
@@ -126,7 +126,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                     return
 
 
-            # In all other cases stop further search in this branch of the tree在所有其他情况下，停止在树的这个分支的进一步搜索
+            # In all other cases stop further search in this branch of the tree在所有其他情况（非正常结束程序）下，停止在树的这个分支的进一步搜索
             else:
                 return 
     
@@ -136,7 +136,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
         # 2) calldataload
         # 3) calldatasize
         # 4) unknown instruction
-        if pos == newpos:#pc不增加
+        if pos == newpos:#pc不增加的四种情况
         
             si = ops[pos]
 
@@ -147,8 +147,8 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
                     if debug: print('\033[95m[-] In JUMPI (line %x) the stack is too small to execute JUMPI\033[0m' % pos )
                     return False
         
-                addr = stack.pop()
-                des = stack.pop()
+                addr = stack.pop()#第一个弹出的参数是条件
+                des = stack.pop()#目的地址，要跳转的地址
 
                 if is_undefined(des):#表达式不能被求值
                     if debug: print('\033[95m[-] In JUMPI the expression cannot be evaluated (is undefined)\033[0m'   )
@@ -158,35 +158,35 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
 
 
                 #
-                # Branch when decision is incorrect (no need to compute the addresses)  决定不正确时则分支    
+                # Branch when decision is incorrect (no need to compute the addresses)  决定不正确时（不需要计算地址）则分支    
                 #
 
                 # In the fast search mode, the jumpi pos + 1 must be in the list of good jump positions
                 if is_good_jump( ops, pos+1, debug ): 
 
-                    MyGlobals.s.push()
-                    MyGlobals.s.add( des['z3'] == 0)
+                    MyGlobals.s.push()#把下面的断言压入栈
+                    MyGlobals.s.add( des['z3'] == 0)#添加限制到z3 solver
                     try:
 
-                        if MyGlobals.s.check() == sat:
+                        if MyGlobals.s.check() == sat:#如果可解，如果没有目标地址则继续深搜
 
 
                             storage2 = copy.deepcopy(storage)
                             stack2 = copy.deepcopy(stack)
                             trace2 = copy.deepcopy(trace)
                             mmemory2 = copy.deepcopy(mmemory)
-                            data2 = copy.deepcopy(data)
+                            data2 = copy.deepcopy(data)#深拷贝各个存储区
 
                             if debug: print('\t'*8+'-'*20+'JUMPI branch 1 (go through)')
                             sole = ''
-
+                            #用深拷贝的存储区执行
                             execute_one_block(ops,stack2,   pos + 1,    trace2, storage2,   mmemory2, data2, configurations,    search_op, search_function, jumpdepth+1, calldepth, debug, read_from_blockchain )
-                    #每执行一个块则jumpdepth+1，
+                            #每执行一个块则jumpdepth+1
 
                     except Exception as e:
                         print ("Exception: "+str(e))
 
-                    MyGlobals.s.pop()
+                    MyGlobals.s.pop()#删除和push之间的限制条件，弹出断言
 
 
                 if MyGlobals.stop_search: return
