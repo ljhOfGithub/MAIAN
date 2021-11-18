@@ -13,7 +13,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
 
 
 
-    global s, stop_search, search_condition_found, visited_nodes
+    global s, stop_search, search_condition_found, visited_nodes#为了使用MyGlobals的类变量
 
     if MyGlobals.stop_search : return 
 
@@ -21,7 +21,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
     if MyGlobals.visited_nodes > MyGlobals.MAX_VISITED_NODES: return
     
     
-    # Execute the next block of operations
+    # Execute the next block of operations 执行操作的新块
     first = True
     newpos = pos
     while (first or newpos != pos) and not MyGlobals.stop_search:
@@ -32,7 +32,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
             
         # If no more code, then stop
         if pos >= len(ops) or pos < 0:
-            if debug: print('\033[94m[+] Reached bad/end of execution\033[0m')
+            if debug: print('\033[94m[+] Reached bad/end of execution\033[0m')#执行结束
             return False
 
 
@@ -61,23 +61,23 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
         # - it is jumpdest
         # - it is the first instruction after JUMPI 
         if pos == 0 or ops[pos]['o'] == 'JUMPDEST' or (pos > 0 and ops[pos-1]['o'] == 'JUMPI'):
-            if seen_configuration( configurations, ops, pos, stack, mmemory, storage): 
+            if seen_configuration( configurations, ops, pos, stack, mmemory, storage): #如果有配置则可以debug，否则添加默认配置
                 if debug:print ('\033[95m[-] Seen configuration\033[0m' )
                 return
         
     
 
-        # Check if the current op is one of the search ops
+        # Check if the current op is one of the search ops判断当前的操作是否是搜索的操作之一
         if ops[pos]['o'] in search_op:
 
             if debug:
                 print('\033[96m[+] Reached %s at %x \033[0m'  % (ops[pos]['o'], ops[pos]['id'] ) )
                 print_stack( stack )
-
+        #search_function是类似ether_lock_can_recieve,ether_lock_can_send，ether_suicide，ether_leak函数的函数变量，可以传入参数，相当于调用该函数
             new_search_condition_found, stop_expanding_the_search_tree =  search_function( ops[pos]['o'] , stack , trace, debug )
             MyGlobals.search_condition_found = MyGlobals.search_condition_found or new_search_condition_found
 
-            if stop_expanding_the_search_tree:
+            if stop_expanding_the_search_tree:#如果停止生成搜索树则返回函数调用追踪的参数
                 get_function_calls( calldepth, debug )
 
 

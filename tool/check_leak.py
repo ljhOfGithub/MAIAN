@@ -52,18 +52,18 @@ def ether_leak( op, stack, trace, debug ):
     return False, False
 
 
-def run_one_check( max_call_depth, ops, contract_address, debug, read_from_blockchain ):
+def run_one_check( max_call_depth, ops, contract_address, debug, read_from_blockchain ):#进行检查前的参数设置
 
-    global MAX_CALL_DEPTH
+    global MAX_CALL_DEPTH#使用该函数之外定义的变量MAX_CALL_DEPTH
 
-    print('\n[ ]\033[1m Search with call depth: %d   : \033[0m' % (max_call_depth) , end = '')
+    print('\n[ ]\033[1m Search with call depth: %d   : \033[0m' % (max_call_depth) , end = '')#使用设置的调用深度搜索
 
 
-    initialize_params(read_from_blockchain, contract_address )
-    clear_globals()
+    initialize_params(read_from_blockchain, contract_address )#初始化本地区块链的参数
+    clear_globals()#重置MyGlobals对象的变量
 
     # The amount of sent Ether to the contract is zero
-    set_params( 'call_value', '','0'  )
+    set_params( 'call_value', '','0'  )#设置MyGlobals对象的参数
 
     MyGlobals.MAX_CALL_DEPTH    = max_call_depth
 
@@ -81,7 +81,7 @@ def run_one_check( max_call_depth, ops, contract_address, debug, read_from_block
 def check_one_contract_on_ether_leak(contract_bytecode, contract_address, debug = False, read_from_blockchain = False, confirm_exploit=False, fhashes=[] ):
 
 
-    print('\033[94m[ ] Check if contract is PRODIGAL\033[0m\n')
+    print('\033[94m[ ] Check if contract is PRODIGAL\033[0m\n')#检查一个合约是否是浪费的
     print('[ ] Contract address   : %s' % contract_address)
     print('[ ] Contract bytecode  : %s...' % contract_bytecode[:50])
     print('[ ] Bytecode length    : %d' % len(contract_bytecode) )
@@ -90,8 +90,8 @@ def check_one_contract_on_ether_leak(contract_bytecode, contract_address, debug 
 
 
 
-    ops = parse_code( contract_bytecode, debug )
-    if not code_has_instruction( ops, ['CALL','SUICIDE']) :
+    ops = parse_code( contract_bytecode, debug )#汇编指令对象列表
+    if not code_has_instruction( ops, ['CALL','SUICIDE']) :#是否有call，suicide指令，如果没有则该合约不是浪费的合约
         #if debug: 
         print('\033[92m[+] The code does not have CALL/SUICIDE, hence it is not prodigal\033[0m')
         return False
@@ -101,7 +101,7 @@ def check_one_contract_on_ether_leak(contract_bytecode, contract_address, debug 
     # Search for function invocations (from 1 to max_calldepth) that can make the contract to leak Ether
     #
 
-    for i in range( 1 , MyGlobals.max_calldepth_in_normal_search + 1 ):
+    for i in range( 1 , MyGlobals.max_calldepth_in_normal_search + 1 ):#
         run_one_check( i, ops, contract_address, debug, read_from_blockchain )
 
         if MyGlobals.stop_search: 
