@@ -39,7 +39,7 @@ def compile_contract(filename):
     print('\033[92m Done \033[0m')
 
 
-def get_function_hashes(contract):
+def get_function_hashes(contract):#获得函数的哈希值
 
         
     data = json.load(open('out/'+contract+'.abi'))#
@@ -84,23 +84,23 @@ def deploy_contract(filename, etherbase, rawcode = False):
         abi = json.loads(abi)
 
     print('\033[1m[ ] Deploying contract \033[0m', end='')
-    MyGlobals.web3.personal.unlockAccount(etherbase, '1', 15000)
+    MyGlobals.web3.personal.unlockAccount(etherbase, '1', 15000)#address - String: 要解锁的账户地址。  password - String - 账户密码。  unlockDuration - Number - 将帐户保持在解锁状态的持续时间。
 
 
-    try:
-        transaction_creation_hash = MyGlobals.web3.eth.sendTransaction( {'from':etherbase, 'data': ('0x' if byt[0:2]!='0x' else '') +byt , 'gas':6000000} )
+    try:#发送一个交易到网络，返回交易的哈希值
+        transaction_creation_hash = MyGlobals.web3.eth.sendTransaction( {'from':etherbase, 'data': ('0x' if byt[0:2]!='0x' else '') +byt , 'gas':6000000} )#
     except Exception as e:
         print ("Exception: "+str(e))
         return None
 
     global s
     s = sched.scheduler(time.time, time.sleep)
-    s.enter(1, 1, confirm_contract, (transaction_creation_hash,))
-    s.run()
+    s.enter(1, 1, confirm_contract, (transaction_creation_hash,))#每隔一秒调用一次confirm_contract函数，后面是confirm_contract函数的参数
+    s.run()#运行事件调度器
     print('\033[92m confirmed at address: %s \033[0m' % contract_address)
-    fullcode = MyGlobals.web3.eth.getCode(contract_address)
+    fullcode = MyGlobals.web3.eth.getCode(contract_address)#给定地址合约编译后的字节代码
     print('\033[1m[ ] Contract code length on the blockchain : \033[0m \033[92m  %d  : %s... \033[0m' % (len(fullcode), fullcode[:30] ) )
-    with open('./out/'+filename_write_address, 'w') as f:
+    with open('./out/'+filename_write_address, 'w') as f:#写入合约字节码
         f.write(contract_address)
         f.close()
     print('\033[1m[ ] Contract address saved in file: \033[0m\033[92m%s \033[0m' % ('./out/'+filename_write_address))
@@ -111,15 +111,15 @@ def deploy_contract(filename, etherbase, rawcode = False):
 def confirm_contract(transaction_creation_hash):
     print('.', end="")
 #    sys.stdout.flush()
-    global contract_address
-    receipt = MyGlobals.web3.eth.getTransactionReceipt(transaction_creation_hash)
-    if( receipt is not None):
-        contract_address = receipt['contractAddress']
+    global contract_address#如果交易是一个合约创建的，请使用web3.eth.getTransactionReceipt()在交易完成后获取合约的地址。
+    receipt = MyGlobals.web3.eth.getTransactionReceipt(transaction_creation_hash)#获得交易的收据对象，如果找不到返回null
+    if( receipt is not None):#有收据
+        contract_address = receipt['contractAddress']#记录收据和合约的映射关系
         return
 
     s.enter(1, 1, confirm_contract, (transaction_creation_hash,))
 
-
+#下面三个函数负责rlp编码
 def rlp_encode(input):
     if isinstance(input,str):
         if len(input) == 1 and ord(input) < 0x80: return input

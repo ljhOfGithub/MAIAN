@@ -15,9 +15,9 @@ from z3 import *
 from misc import *
 
 
-def is_fixed(s): return s['type'] == 'constant' and is_bv_value(simplify(s['z3']))
+def is_fixed(s): return s['type'] == 'constant' and is_bv_value(simplify(s['z3']))#常数或者常向量
 def is_undefined(s): return s['type'] == 'undefined'
-def get_value(s): return  simplify(s['z3']).as_long()
+def get_value(s): return  simplify(s['z3']).as_long()#获得向量的值
 
 def power(y, x, n):
     if x == 0: #base case
@@ -83,7 +83,7 @@ def unary( o1, step, op='NONE' ):
     return {'type':'constant','step':step, 'z3': z3} 
 
 
-def binary( o1, o2 , step, op='NONE'):
+def binary( o1, o2 , step, op='NONE'):#二元操作码
 
 
     # In some cases the result can be determined with the knowledge of only one operand
@@ -147,7 +147,7 @@ def binary( o1, o2 , step, op='NONE'):
 
 
 
-def ternary( o1, o2 , o3, step, op='NONE'):
+def ternary( o1, o2 , o3, step, op='NONE'):#三元操作码
 
     if o3['type'] == 'constant' and is_bv_value(simplify(o3['z3'])) and 0 == simplify(o3['z3']).as_long(): return {'type':'constant','step':step, 'z3':BitVecVal(0,256) }
 

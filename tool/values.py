@@ -107,7 +107,7 @@ def print_configuration( conf ):
         print_storage(c['storage'])
 
 
-class MyGlobals(object):
+class MyGlobals(object):#全局变量管理类
 
 
     MAX_JUMP_DEPTH          = 60                    # path length in CFG
