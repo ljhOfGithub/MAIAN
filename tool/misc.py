@@ -66,7 +66,7 @@ def get_function_calls( calldepth, debug ):
             sol[str(d)] = '%x' % m[d].as_long()#将模型中的输出到字典sol中
 
 
-        function_inputs = {}
+        function_inputs = {}#函数输入列表
     
         # Get separate calldepth inputs 不同的调用深度的输入
         for cd in range (1,calldepth+1):#cd是calldepth

@@ -6,14 +6,14 @@ from blockchain import *
 
 
 
-def ether_leak( op, stack, trace, debug ):
+def ether_leak( op, stack, trace, debug ):#检查两种eth泄露的情况
 
     global s
     
     # CALL leaks
     if op == 'CALL' and len(stack) >= 7 and stack[-2]['type'] == 'constant' and stack[-3]['type']=='constant':
         MyGlobals.s.push()
-        MyGlobals.s.add( stack[-2]['z3'] == BitVecVal( int( get_params('my_address',''), 16), 256) )        # CALL sent address coincides with our address
+        MyGlobals.s.add( stack[-2]['z3'] == BitVecVal( int( get_params('my_address',''), 16), 256) )        # CALL sent address coincides with our address CALL指令将eth发送到我们创建的账户地址上
         MyGlobals.s.add( stack[-3]['z3'] > 0)                                                               # amount of Ether sent is > 0
         try:
             if MyGlobals.s.check() == sat:
