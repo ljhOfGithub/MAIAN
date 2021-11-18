@@ -333,7 +333,7 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
 
                     if -1 not in data2:
                         data2['inputlength-'+str(calldepth)] = BitVec('inputlength-'+str(calldepth), 256)
-                    stack2.append( {'type':'constant','step':ops[pos]['id'], 'z3': data2['inputlength-'+str(calldepth)]} )
+                    stack2.append( {'type':'constant','step':ops[pos]['id'], 'z3': data2['inputlength-'+str(calldepth)]} )#step指令在字节码中的序号,存入data的大小
                     execute_one_block(ops,stack2,   pos+1,  trace2, storage2,   mmemory2, data2, configurations,    search_op, search_function,  jumpdepth, calldepth, debug, read_from_blockchain )
 
                     

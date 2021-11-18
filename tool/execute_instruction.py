@@ -16,11 +16,11 @@ from misc import *
 
 
 def is_fixed(s): return s['type'] == 'constant' and is_bv_value(simplify(s['z3']))#常数或者常向量
-def is_undefined(s): return s['type'] == 'undefined'
+def is_undefined(s): return s['type'] == 'undefined'#检查memory中的数值类型是否是未定义
 def get_value(s): return  simplify(s['z3']).as_long()#获得向量的值
 
 def power(y, x, n):
-    if x == 0: #base case
+    if x == 0: #base case指数是0
         return 1
     elif (x%2==0): #x even 
         return power((y*y)%n,x//2,n)%n
@@ -68,7 +68,7 @@ def store_in_memory( mmemory, addr, value ):
 
 
 
-def unary( o1, step, op='NONE' ):
+def unary( o1, step, op='NONE' ):#一元操作码
 
     if is_undefined(o1): return {'type':'undefined','step':step}
 
