@@ -246,10 +246,10 @@ def execute_one_block( ops , stack , pos , trace, storage, mmemory, data, config
 
                 addr = stack.pop()#地址
 
-                # First find the symbolic variable name
+                # First find the symbolic variable name 先找符号变量名
                 text = str(addr['z3'])
                 regex = re.compile('input[0-9]*\[[0-9 ]*\]')
-                match = re.search( regex, text)
+                match = re.search( regex, text)#用正则表达式寻找起止坐标
                 if match:
                     sm = text[match.start():match.end()]
 
